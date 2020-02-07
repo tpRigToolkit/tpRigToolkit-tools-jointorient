@@ -42,8 +42,7 @@ class JointOrientWidget(base.BaseWidget, object):
     def ui(self):
         super(JointOrientWidget, self).ui()
 
-        ### Auto Orient Joint Widget ###
-
+        # Auto Orient Joint Widget
         joint_ori_widget = QWidget()
         joint_ori_widget.setLayout(QVBoxLayout())
         joint_ori_widget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
@@ -148,7 +147,7 @@ class JointOrientWidget(base.BaseWidget, object):
         spacer_item = QSpacerItem(2, 2, QSizePolicy.Fixed)
         self.main_layout.addSpacerItem(spacer_item)
 
-        ### Manual Orient Joint Widget ###
+        # Manual Orient Joint Widget
         manual_joint_ori_widget = QWidget()
         manual_joint_ori_widget.setLayout(QVBoxLayout())
         manual_joint_ori_widget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
