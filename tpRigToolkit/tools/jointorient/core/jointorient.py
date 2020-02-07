@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Node based auto rigger
+Tool to orient joints quickly
 """
 
 from __future__ import print_function, division, absolute_import
