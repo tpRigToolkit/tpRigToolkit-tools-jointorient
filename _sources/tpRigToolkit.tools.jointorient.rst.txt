@@ -1,0 +1,17 @@
+tpRigToolkit.tools.jointorient package
+======================================
+
+Subpackages
+-----------
+
+.. toctree::
+
+   tpRigToolkit.tools.jointorient.core
+
+Module contents
+---------------
+
+.. automodule:: tpRigToolkit.tools.jointorient
+   :members:
+   :undoc-members:
+   :show-inheritance:
