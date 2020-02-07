@@ -23,8 +23,6 @@ from tpQtLib.widgets import splitters
 
 import tpRigToolkit
 
-EDITOR_TARGET_FPS = 60
-
 
 class JointOrientTool(tpRigToolkit.Tool, object):
     def __init__(self, config):
@@ -434,13 +432,13 @@ class JointOrientWidget(base.BaseWidget, object):
             if aim_target != '':
 
                 # Apply an aim constraint from the joint to its child (target)
-                maya.cmds.delete(maya.cmds.aimConstraint(aim_target, jnt, aim=aim_axis, upVector=up_axis,
-                                                         worldUpVector=world_up_axis,
-                                                         worldUpType='vector', weight=1.0))
+                tp.Dcc.delete_object(tp.Dcc.create_aim_constraint(
+                    jnt, aim_target, aim_axis=aim_axis, up_axis=up_axis, world_up_axis=world_up_axis,
+                    world_up_type='vector', weight=1.0))
 
                 # Clear joint axis
-                maya.cmds.joint(jnt, edit=True, zeroScaleOrient=True)
-                maya.cmds.makeIdentity(jnt, apply=True)
+                tp.Dcc.zero_scale_joint(jnt)
+                tp.Dcc.reset_node_transforms(jnt, preserve_pivot_transforms=True)
 
             elif parent != '':
                 reset_joints.append(jnt)
@@ -471,27 +469,25 @@ class JointOrientWidget(base.BaseWidget, object):
 
         for jnt in joints:
             # Adjust the rotation axis
-            maya.cmds.xform(jnt, rotateAxis=[tweak_rot[0], tweak_rot[1], tweak_rot[2]], relative=True, objectSpace=True)
+            tp.Dcc.set_node_rotation_axis_in_object_space(jnt, tweak_rot[0], tweak_rot[1], tweak_rot[2])
 
             # Clear joint axis
-            maya.cmds.joint(jnt, edit=True, zeroScaleOrient=True)
-            maya.cmds.makeIdentity(jnt, apply=True)
+            tp.Dcc.zero_scale_joint(jnt)
+            tp.Dcc.reset_node_transforms(jnt, preserve_pivot_transforms=True)
 
         tp.Dcc.select_object(joints, replace_selection=True)
 
     @tp.Dcc.get_undo_decorator()
     def set_manual_orient_joints(self):
 
+        childs = list()
+
         tweak_rot = [self.manual_joint_ori_x_spin.value(), self.manual_joint_ori_y_spin.value(),
                      self.manual_joint_ori_z_spin.value()]
         joints = tp.Dcc.selected_nodes_of_type(node_type='joint')
-
         for jnt in joints:
-
             if not self.manual_joint_ori_set_cbx.isChecked():
-
                 childs = tp.Dcc.list_children(jnt, children_type=['transform', 'joint'])
-
                 if childs:
                     if len(childs) > 0:
                         for child in childs:
@@ -502,8 +498,8 @@ class JointOrientWidget(base.BaseWidget, object):
                 tp.Dcc.set_attribute_value(jnt, 'jointOrient{}'.format(axis.upper()), tweak_rot[i])
 
             # Clear joint axis
-            maya.cmds.joint(jnt, edit=True, zeroScaleOrient=True)
-            maya.cmds.makeIdentity(jnt, apply=True)
+            tp.Dcc.zero_scale_joint(jnt)
+            tp.Dcc.reset_node_transforms(jnt, preserve_pivot_transforms=True)
 
             if childs:
                 for child in childs:
