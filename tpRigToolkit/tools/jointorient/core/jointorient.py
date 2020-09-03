@@ -41,7 +41,8 @@ class JointOrientTool(tool.DccTool, object):
             'tooltip': ' Tool to orient joints quickly',
             'tags': ['tpRigToolkit', 'joint', 'orient'],
             'logger_dir': os.path.join(os.path.expanduser('~'), 'tpRigToolkit', 'logs', 'tools'),
-            'logger_level': 'INFO'
+            'logger_level': 'INFO',
+            'size': [425, 600]
         }
         base_tool_config.update(tool_config)
 

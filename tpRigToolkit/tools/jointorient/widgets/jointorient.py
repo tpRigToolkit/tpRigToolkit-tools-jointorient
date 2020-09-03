@@ -294,124 +294,15 @@ class JointOrientController(object):
         self._model.up_world_axis_y = 0.0
         self._model.up_world_axis_z = 1.0
 
-    @tp.Dcc.get_undo_decorator()
     def orient_joints(self):
-        reset_joints = list()
+        return self._client.orient_joints(
+            aim_axis_index=self._model.axim_axis, aim_axis_reverse=self._model.aim_axis_reverse,
+            up_axis_index=self._model.up_axis, up_axis_reverse=self._model.up_axis_reverse,
+            up_world_axis_x=self._model.up_world_axis_x, up_world_axis_y=self._model.up_world_axis_y,
+            up_world_axis_z=self._model.up_world_axis_z, apply_to_hierarchy=self._model.apply_to_hierarchy)
 
-        # Get up and aim axis
-        aim_axis = [0, 0, 0]
-        up_axis = [0, 0, 0]
-        world_up_axis = [self._model.up_world_axis_x, self._model.up_world_axis_y, self._model.up_world_axis_z]
-
-        aim_axis_index = self._model.aim_axis
-        up_axis_index = self._model.up_axis
-
-        if aim_axis_index == up_axis_index:
-            LOGGER.warning('aim and up axis are the same, maybe orientation wont work correctly!')
-
-        aim_axis_reverse = 1.0 if not self._model.aim_axis_reverse else -1.0
-        up_axis_reverse = 1.0 if not self._model.up_axis_reverse else -1.0
-
-        aim_axis[aim_axis_index] = aim_axis_reverse
-        up_axis[up_axis_index] = up_axis_reverse
-
-        # Get selected joints
-        if self._model.apply_to_hierarchy:
-            tp.Dcc.select_hierarchy()
-
-        joints = tp.Dcc.selected_nodes_of_type(node_type='joint', full_path=False)
-        if not joints:
-            return
-
-        for jnt in reversed(joints):
-            childs = tp.Dcc.list_children(jnt, all_hierarchy=False, children_type=['transform', 'joint'])
-
-            # If the joints has direct childs, unparent that childs and store names
-            if childs:
-                if len(childs) > 0:
-                    childs = tp.Dcc.set_parent_to_world(childs)
-
-            # Get parent of this joints for later use
-            parent = ''
-            parents = tp.Dcc.node_parent(jnt)
-            if parents:
-                parent = parents[0]
-
-            # Aim to the child
-            aim_target = ''
-            if childs:
-                for child in childs:
-                    if tp.Dcc.node_type(child) == 'joint':
-                        aim_target = child
-                        break
-
-            if aim_target != '':
-
-                # Apply an aim constraint from the joint to its child (target)
-                tp.Dcc.delete_object(tp.Dcc.create_aim_constraint(
-                    jnt, aim_target, aim_axis=aim_axis, up_axis=up_axis, world_up_axis=world_up_axis,
-                    world_up_type='vector', weight=1.0))
-
-                # Clear joint axis
-                tp.Dcc.zero_scale_joint(jnt)
-                tp.Dcc.freeze_transforms(jnt, preserve_pivot_transforms=True)
-
-            elif parent != '':
-                reset_joints.append(jnt)
-
-            # Reparent child
-            if childs:
-                if len(childs) > 0:
-                    tp.Dcc.set_parent(childs, jnt)
-
-        for jnt in reset_joints:
-            # If there is no target, the joint will take its parent orientation
-            for axis in ['x', 'y', 'z']:
-                tp.Dcc.set_attribute_value(
-                    jnt, 'jointOrient{}'.format(axis.upper()), tp.Dcc.get_attribute_value(jnt, 'r{}'.format(axis)))
-                tp.Dcc.set_attribute_value(jnt, 'r{}'.format(axis), 0)
-
-        tp.Dcc.select_object(joints, replace_selection=True)
-
-    @tp.Dcc.get_undo_decorator()
     def reset_joints_orient_to_world(self):
-
-        if self._model.apply_to_hierarchy:
-            tp.Dcc.select_hierarchy()
-
-        joints = tp.Dcc.selected_nodes_of_type(node_type='joint', full_path=False)
-        if not joints:
-            return
-
-        for jnt in reversed(joints):
-            childs = tp.Dcc.list_children(jnt, all_hierarchy=False, children_type=['transform', 'joint'])
-
-            # If the joints has direct childs, unparent that childs and store names
-            if childs:
-                if len(childs) > 0:
-                    childs = tp.Dcc.set_parent_to_world(childs)
-
-            # Get parent of this joints for later use
-            parent = tp.Dcc.node_parent(jnt, full_path=False) or ''
-
-            if parent:
-                tp.Dcc.set_parent_to_world(jnt)
-
-            # Clear joint axis
-            tp.Dcc.zero_scale_joint(jnt)
-            tp.Dcc.freeze_transforms(jnt, preserve_pivot_transforms=True)
-            tp.Dcc.zero_orient_joint(jnt)
-
-            # Reparent
-            if parent:
-                tp.Dcc.set_parent(jnt, parent)
-
-            # Reparent child
-            if childs:
-                if len(childs) > 0:
-                    tp.Dcc.set_parent(childs, jnt)
-
-        tp.Dcc.select_object(joints, replace_selection=True)
+        return self._client.reset_joints_orient_to_world(apply_to_hierarchy=self._model.apply_to_hierarchy)
 
 
 def joint_orient(client, parent=None):

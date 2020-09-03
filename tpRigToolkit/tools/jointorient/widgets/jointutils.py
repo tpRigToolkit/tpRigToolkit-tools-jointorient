@@ -69,28 +69,12 @@ class JointUtilsController(object):
     def model(self):
         return self._model
 
-    @staticmethod
-    @tp.Dcc.get_undo_decorator()
     @tp.Dcc.get_repeat_last_decorator(__name__ + '.JointUtilsController')
-    def set_lra(state):
-        sel = tp.Dcc.selected_nodes()
-        for obj in sel:
-            if tp.Dcc.attribute_exists(obj, 'displayLocalAxis'):
-                tp.Dcc.set_attribute_value(obj, 'displayLocalAxis', state)
+    def set_lra(self, state):
+        return self._client.set_local_rotation_axis(state)
 
-    @staticmethod
-    @tp.Dcc.get_undo_decorator()
-    @tp.Dcc.get_repeat_last_decorator(__name__ + '.JointUtilsController')
-    def select_hierarchy():
-
-        """
-        Method that selects the hierachy of the selected nodes
-        """
-
-        sel = tp.Dcc.selected_nodes()
-
-        for obj in sel:
-            tp.Dcc.select_hierarchy(obj, add=True)
+    def select_hierarchy(self):
+        return self._client.select_hierarchy()
 
 
 def joint_utils(client, parent=None):

@@ -150,16 +150,9 @@ class RotationAxisController(object):
     def change_affect_children(self, flag):
         self._model.affect_children = flag
 
-    @tp.Dcc.get_undo_decorator()
     def set_rotation_axis(self):
-        sel = tp.Dcc.selected_nodes_of_type(node_type=['joint', 'transform']) or list()
-        for obj in sel:
-            tp.Dcc.set_rotation_axis(obj, self._model.rotation_axis)
-            if self._model.affect_children:
-                childs = tp.Dcc.list_children(
-                    obj, children_type=['transform', 'joint'], full_path=True, all_hierarchy=True) or list()
-                for child in childs:
-                    tp.Dcc.set_rotation_axis(child, self._model.rotation_axis)
+        return self._client.set_rotation_axis(
+            rotation_axis=self._model.rotation_axis, affect_children=self._model.affect_children)
 
 
 def rotation_axis(client, parent=None):

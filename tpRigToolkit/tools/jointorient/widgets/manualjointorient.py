@@ -261,69 +261,17 @@ class ManualOrientJointController(object):
         self._model.y_axis = 0.0
         self._model.z_axis = 0.0
 
-    @tp.Dcc.get_undo_decorator()
     def manual_orient_joints(self, orient_type):
+        return self._client.manual_orient_joints(
+            orient_type=orient_type, x_axis=self._model.x_axis, y_axis=self._model.y_axis, z_axis=self._model.z_axis,
+            affect_children=self._model.affect_children
+        )
 
-        if orient_type == 'add':
-            tweak = 1.0
-        else:
-            tweak = -1.0
-
-        tweak_rot = [self._model.x_axis * tweak, self._model.y_axis * tweak, self._model.z_axis * tweak]
-
-        joints = tp.Dcc.selected_nodes_of_type(node_type='joint')
-        if not joints:
-            return
-
-        for jnt in joints:
-            tp.Dcc.set_node_rotation_axis_in_object_space(jnt, tweak_rot[0], tweak_rot[1], tweak_rot[2])
-            tp.Dcc.zero_scale_joint(jnt)
-            tp.Dcc.freeze_transforms(jnt, preserve_pivot_transforms=True)
-
-            if self._model.affect_children:
-                childs = tp.Dcc.list_children(
-                    jnt, children_type=['transform', 'joint'], full_path=False, all_hierarchy=True) or list()
-                for child in childs:
-                    parent = tp.Dcc.node_parent(child)
-                    tp.Dcc.set_parent_to_world(child)
-                    tp.Dcc.set_node_rotation_axis_in_object_space(child, tweak_rot[0], tweak_rot[1], tweak_rot[2])
-                    tp.Dcc.zero_scale_joint(child)
-                    tp.Dcc.freeze_transforms(child, preserve_pivot_transforms=True)
-                    tp.Dcc.set_parent(child, parent)
-
-        tp.Dcc.select_object(joints, replace_selection=True)
-
-    @tp.Dcc.get_undo_decorator()
     def set_manual_orient_joints(self):
-
-        childs = list()
-
-        tweak_rot = [self._model.x_axis, self._model.y_axis, self._model.z_axis]
-
-        joints = tp.Dcc.selected_nodes_of_type(node_type='joint', full_path=False)
-        if not joints:
-            return
-
-        for jnt in joints:
-            if not self._model.affect_children:
-                childs = tp.Dcc.list_children(
-                    jnt, children_type=['transform', 'joint'], full_path=False, all_hierarchy=False) or list()
-                for child in childs:
-                    tp.Dcc.set_parent_to_world(child)
-
-            # Set the rotation axis
-            for i, axis in enumerate(['x', 'y', 'z']):
-                tp.Dcc.set_attribute_value(jnt, 'jointOrient{}'.format(axis.upper()), tweak_rot[i])
-
-            # Clear joint axis
-            tp.Dcc.zero_scale_joint(jnt)
-            tp.Dcc.freeze_transforms(jnt, preserve_pivot_transforms=True)
-
-            if childs:
-                for child in childs:
-                    tp.Dcc.set_parent(child, jnt)
-
-        tp.Dcc.select_object(joints, replace_selection=True)
+        return self._client.set_manual_joints(
+            x_axis=self._model.x_axis, y_axis=self._model.y_axis, z_axis=self._model.z_axis,
+            affect_children=self._model.affect_children
+        )
 
 
 def manual_joint_orient(client, parent=None):
