@@ -105,7 +105,7 @@ class JointOrientClient(client.DccClient, object):
 
         return reply_dict['success']
 
-    def set_local_rotation_axis(self,state):
+    def set_local_rotation_axis(self, state):
         cmd = {
             'cmd': 'set_local_rotation_axis',
             'state': state
