@@ -1,0 +1,7 @@
+tpRigToolkit.tools.jointorient.widgets.rotationaxis module
+==========================================================
+
+.. automodule:: tpRigToolkit.tools.jointorient.widgets.rotationaxis
+   :members:
+   :undoc-members:
+   :show-inheritance:

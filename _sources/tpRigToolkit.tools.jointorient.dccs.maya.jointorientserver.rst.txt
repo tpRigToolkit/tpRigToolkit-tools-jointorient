@@ -1,0 +1,7 @@
+tpRigToolkit.tools.jointorient.dccs.maya.jointorientserver module
+=================================================================
+
+.. automodule:: tpRigToolkit.tools.jointorient.dccs.maya.jointorientserver
+   :members:
+   :undoc-members:
+   :show-inheritance:

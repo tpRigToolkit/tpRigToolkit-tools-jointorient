@@ -1,0 +1,21 @@
+tpRigToolkit.tools.jointorient.widgets package
+==============================================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   tpRigToolkit.tools.jointorient.widgets.jointorient
+   tpRigToolkit.tools.jointorient.widgets.jointutils
+   tpRigToolkit.tools.jointorient.widgets.manualjointorient
+   tpRigToolkit.tools.jointorient.widgets.rotationaxis
+
+Module contents
+---------------
+
+.. automodule:: tpRigToolkit.tools.jointorient.widgets
+   :members:
+   :undoc-members:
+   :show-inheritance:

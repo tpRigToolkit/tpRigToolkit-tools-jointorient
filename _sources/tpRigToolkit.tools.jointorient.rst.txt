@@ -5,8 +5,11 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    tpRigToolkit.tools.jointorient.core
+   tpRigToolkit.tools.jointorient.dccs
+   tpRigToolkit.tools.jointorient.widgets
 
 Module contents
 ---------------

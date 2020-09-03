@@ -1,0 +1,7 @@
+tpRigToolkit.tools.jointorient.core.model module
+================================================
+
+.. automodule:: tpRigToolkit.tools.jointorient.core.model
+   :members:
+   :undoc-members:
+   :show-inheritance:
