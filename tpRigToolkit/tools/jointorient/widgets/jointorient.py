@@ -296,7 +296,7 @@ class JointOrientController(object):
 
     def orient_joints(self):
         return self._client.orient_joints(
-            aim_axis_index=self._model.axim_axis, aim_axis_reverse=self._model.aim_axis_reverse,
+            aim_axis_index=self._model.aim_axis, aim_axis_reverse=self._model.aim_axis_reverse,
             up_axis_index=self._model.up_axis, up_axis_reverse=self._model.up_axis_reverse,
             up_world_axis_x=self._model.up_world_axis_x, up_world_axis_y=self._model.up_world_axis_y,
             up_world_axis_z=self._model.up_world_axis_z, apply_to_hierarchy=self._model.apply_to_hierarchy)

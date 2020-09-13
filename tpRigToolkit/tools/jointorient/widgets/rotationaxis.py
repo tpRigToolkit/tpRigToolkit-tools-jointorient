@@ -76,6 +76,8 @@ class RotationAxisView(base.BaseWidget, object):
 
         available_axises = self._model.available_rotation_axis or dict()
         for i, (name, order) in enumerate(available_axises.items()):
+            if order.lower() not in tp.Dcc.ROTATION_AXES:
+                continue
             rot_axis_index = tp.Dcc.ROTATION_AXES.index(order.lower())
             self._set_rot_axis_common_btn_menu.addAction(
                 '({})   {}'.format(order, name), partial(self._controller.change_rotation_order, rot_axis_index))

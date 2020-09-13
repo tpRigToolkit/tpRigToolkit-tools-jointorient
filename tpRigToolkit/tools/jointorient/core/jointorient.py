@@ -34,7 +34,7 @@ class JointOrientTool(tool.DccTool, object):
         base_tool_config = tool.DccTool.config_dict(file_name=file_name)
         tool_config = {
             'name': 'Joint Orient',
-            'id': 'tpRigToolkit-tools-jointorient',
+            'id': TOOL_ID,
             'supported_dccs': {'maya': ['2017', '2018', '2019', '2020']},
             'logo': 'jointorient',
             'icon': 'jointorient',
@@ -42,7 +42,11 @@ class JointOrientTool(tool.DccTool, object):
             'tags': ['tpRigToolkit', 'joint', 'orient'],
             'logger_dir': os.path.join(os.path.expanduser('~'), 'tpRigToolkit', 'logs', 'tools'),
             'logger_level': 'INFO',
-            'size': [425, 600]
+            'is_checkable': False,
+            'is_checked': False,
+            'menu_ui': {'label': 'Joint Orient', 'load_on_startup': False, 'color': '', 'background_color': ''},
+            'size': [425, 600],
+
         }
         base_tool_config.update(tool_config)
 
@@ -73,7 +77,8 @@ class JointOrientToolset(toolset.ToolsetWidget, object):
                     self._update_client()
             except Exception as exc:
                 tp.logger.warning(
-                    'Impossible to launch ControlRig server! Error while importing: {} >> {}'.format(dcc_mod_name, exc))
+                    'Impossible to launch Joint Orient server! Error while importing: {} >> {}'.format(
+                        dcc_mod_name, exc))
                 return
         else:
             self._update_client()
@@ -88,12 +93,3 @@ class JointOrientToolset(toolset.ToolsetWidget, object):
             model=joint_orient_model, controller=joint_orient_controller, parent=self)
 
         return [joint_orient_view]
-
-
-if __name__ == '__main__':
-    import tpDcc
-    import tpDcc.loader
-
-    tpDcc.loader.init(dev=False)
-
-    tpDcc.ToolsMgr().launch_tool_by_id('tpRigToolkit-tools-jointorient')
