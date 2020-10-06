@@ -38,7 +38,7 @@ class JointOrientServer(server.DccServer, object):
         else:
             super(JointOrientServer, self)._process_command(command_name, data_dict, reply_dict)
 
-    @tp.Dcc.get_undo_decorator()
+    @tp.Dcc.undo_decorator()
     def orient_joints(self, data, reply):
         aim_axis_index = data.get('aim_axis_index', 0.0)
         aim_axis_reverse = data.get('aim_axis_reverse', False)
@@ -123,11 +123,11 @@ class JointOrientServer(server.DccServer, object):
                     jnt, 'jointOrient{}'.format(axis.upper()), tp.Dcc.get_attribute_value(jnt, 'r{}'.format(axis)))
                 tp.Dcc.set_attribute_value(jnt, 'r{}'.format(axis), 0)
 
-        tp.Dcc.select_object(joints, replace_selection=True)
+        tp.Dcc.select_node(joints, replace_selection=True)
 
         reply['success'] = True
 
-    @tp.Dcc.get_undo_decorator()
+    @tp.Dcc.undo_decorator()
     def reset_joints_orient_to_world(self, data, reply):
         apply_to_hierarchy = data.get('apply_to_hierarchy', False)
 
@@ -168,11 +168,11 @@ class JointOrientServer(server.DccServer, object):
                 if len(childs) > 0:
                     tp.Dcc.set_parent(childs, jnt)
 
-        tp.Dcc.select_object(joints, replace_selection=True)
+        tp.Dcc.select_node(joints, replace_selection=True)
 
         reply['success'] = True
 
-    @tp.Dcc.get_undo_decorator()
+    @tp.Dcc.undo_decorator()
     def manual_orient_joints(self, data, reply):
 
         orient_type = data.get('orient_type', 'add')
@@ -208,11 +208,11 @@ class JointOrientServer(server.DccServer, object):
                     tp.Dcc.freeze_transforms(child, preserve_pivot_transforms=True)
                     tp.Dcc.set_parent(child, parent)
 
-        tp.Dcc.select_object(joints, replace_selection=True)
+        tp.Dcc.select_node(joints, replace_selection=True)
 
         reply['success'] = True
 
-    @tp.Dcc.get_undo_decorator()
+    @tp.Dcc.undo_decorator()
     def set_manual_orient_joints(self, data, reply):
         x_axis = data.get('x_axis', 0.0)
         y_axis = data.get('y_axis', 0.0)
@@ -246,11 +246,11 @@ class JointOrientServer(server.DccServer, object):
                 for child in childs:
                     tp.Dcc.set_parent(child, jnt)
 
-        tp.Dcc.select_object(joints, replace_selection=True)
+        tp.Dcc.select_node(joints, replace_selection=True)
 
         reply['success'] = True
 
-    @tp.Dcc.get_undo_decorator()
+    @tp.Dcc.undo_decorator()
     def set_rotation_axis(self, data, reply):
         rotation_axis = data.get('rotation_axis', '')
         affect_children = data.get('affect_children', False)
@@ -267,8 +267,8 @@ class JointOrientServer(server.DccServer, object):
         reply['success'] = True
 
     @staticmethod
-    @tp.Dcc.get_undo_decorator()
-    @tp.Dcc.get_repeat_last_decorator(__name__ + '.JointOrientServer')
+    @tp.Dcc.undo_decorator()
+    @tp.Dcc.repeat_last_decorator(__name__ + '.JointOrientServer')
     def set_local_rotation_axis(data, reply):
         state = data.get('state', False)
 
@@ -280,8 +280,8 @@ class JointOrientServer(server.DccServer, object):
         reply['success'] = True
 
     @staticmethod
-    @tp.Dcc.get_undo_decorator()
-    @tp.Dcc.get_repeat_last_decorator(__name__ + '.JointOrientServer')
+    @tp.Dcc.undo_decorator()
+    @tp.Dcc.repeat_last_decorator(__name__ + '.JointOrientServer')
     def select_hierarchy(data, reply):
 
         sel = tp.Dcc.selected_nodes()

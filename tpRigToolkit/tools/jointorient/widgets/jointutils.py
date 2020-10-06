@@ -69,7 +69,7 @@ class JointUtilsController(object):
     def model(self):
         return self._model
 
-    @tp.Dcc.get_repeat_last_decorator(__name__ + '.JointUtilsController')
+    @tp.Dcc.repeat_last_decorator(__name__ + '.JointUtilsController')
     def set_lra(self, state):
         return self._client.set_local_rotation_axis(state)
 
