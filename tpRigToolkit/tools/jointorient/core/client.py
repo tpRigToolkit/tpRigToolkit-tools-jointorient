@@ -45,7 +45,7 @@ class JointOrientClient(client.DccClient, object):
 
         return reply_dict['success']
 
-    def reset_joints_orient_to_world(self, apply_to_hierarchy):
+    def reset_joints_orient_to_world(self, apply_to_hierarchy=False):
         cmd = {
             'cmd': 'reset_joints_orient_to_world',
             'apply_to_hierarchy': apply_to_hierarchy

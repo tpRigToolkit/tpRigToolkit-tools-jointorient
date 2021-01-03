@@ -14,12 +14,12 @@ __email__ = "tpovedatd@gmail.com"
 
 from functools import partial
 
-from Qt.QtCore import *
-from Qt.QtWidgets import *
+from Qt.QtCore import Qt, Signal, QObject
+from Qt.QtWidgets import QSizePolicy, QWidget
 
-import tpDcc as tp
+from tpDcc.managers import resources
 from tpDcc.libs.qt.core import base
-from tpDcc.libs.qt.widgets import layouts, label, spinbox, buttons, group, dividers, checkbox
+from tpDcc.libs.qt.widgets import layouts, spinbox, buttons, group, dividers, checkbox
 
 
 class ManualJointOrientView(base.BaseWidget, object):
@@ -36,41 +36,36 @@ class ManualJointOrientView(base.BaseWidget, object):
         super(ManualJointOrientView, self).ui()
 
         manual_joint_ori_layout = layouts.HorizontalLayout()
-        manual_joint_ori_lbl = label.BaseLabel('  X  Y  Z  ', parent=self)
-        self._manual_joint_ori_x_spin = spinbox.BaseDoubleSpinBox(parent=self)
-        self._manual_joint_ori_y_spin = spinbox.BaseDoubleSpinBox(parent=self)
-        self._manual_joint_ori_z_spin = spinbox.BaseDoubleSpinBox(parent=self)
+        self._manual_joint_ori_x_spin = spinbox.DoubleSpinBoxAxis(axis='x', min=-360, max=360, parent=self)
+        self._manual_joint_ori_y_spin = spinbox.DoubleSpinBoxAxis(axis='y', min=-360, max=360, parent=self)
+        self._manual_joint_ori_z_spin = spinbox.DoubleSpinBoxAxis(axis='z', min=-360, max=360, parent=self)
         self._manual_joint_ori_x_spin.setDecimals(3)
         self._manual_joint_ori_y_spin.setDecimals(3)
         self._manual_joint_ori_z_spin.setDecimals(3)
-        self._manual_joint_ori_x_spin.setRange(-360, 360)
-        self._manual_joint_ori_y_spin.setRange(-360, 360)
-        self._manual_joint_ori_z_spin.setRange(-360, 360)
-        self._manual_joint_ori_x_spin.setLocale(QLocale.English)
-        self._manual_joint_ori_y_spin.setLocale(QLocale.English)
-        self._manual_joint_ori_z_spin.setLocale(QLocale.English)
         self._manual_joint_ori_reset_btn = buttons.BaseButton('Reset', parent=self)
-        manual_joint_ori_layout.addWidget(manual_joint_ori_lbl)
+        self._manual_joint_ori_reset_btn.setIcon(resources.icon('reset'))
         manual_joint_ori_layout.addWidget(self._manual_joint_ori_x_spin)
         manual_joint_ori_layout.addWidget(self._manual_joint_ori_y_spin)
         manual_joint_ori_layout.addWidget(self._manual_joint_ori_z_spin)
         manual_joint_ori_layout.addWidget(self._manual_joint_ori_reset_btn)
 
-        manual_joint_splitter_layout = layouts.VerticalLayout()
-        degree_box = group.BaseGroup(parent=self, layout_orientation=Qt.Horizontal)
-        degree_box.setStyleSheet("border:0px;")
-        manual_joint_splitter_layout.addWidget(degree_box)
+        manual_joint_splitter_layout = layouts.HorizontalLayout()
+        manual_joint_splitter_layout.addStretch()
         self._degrees_checks = list()
         for degree in self._model.available_degrees:
             degree_radio = buttons.BaseRadioButton(str(degree), parent=self)
-            degree_box.addWidget(degree_radio)
+            manual_joint_splitter_layout.addWidget(degree_radio)
             self._degrees_checks.append(degree_radio)
+        manual_joint_splitter_layout.addStretch()
 
         manual_joint_ori_buttons_layout = layouts.HorizontalLayout(spacing=5, margins=(2, 2, 2, 2))
         self._manual_joint_ori_add_btn = buttons.BaseButton('Add', parent=self)
         self._manual_joint_ori_subtract_btn = buttons.BaseButton('Subract', parent=self)
         self._manual_joint_ori_set_btn = buttons.BaseButton('Set', parent=self)
         self._manual_joint_ori_set_cbx = checkbox.BaseCheckBox('Affect children', parent=self)
+        self._manual_joint_ori_add_btn.setIcon(resources.icon('add'))
+        self._manual_joint_ori_subtract_btn.setIcon(resources.icon('minus'))
+        self._manual_joint_ori_set_btn.setIcon(resources.icon('equals'))
         manual_joint_ori_buttons_layout.addWidget(self._manual_joint_ori_add_btn)
         manual_joint_ori_buttons_layout.addWidget(self._manual_joint_ori_subtract_btn)
         manual_joint_ori_buttons_layout.addWidget(self._manual_joint_ori_set_btn)
@@ -82,8 +77,8 @@ class ManualJointOrientView(base.BaseWidget, object):
         set_rot_axis_widget.layout().setContentsMargins(5, 5, 5, 5)
         set_rot_axis_widget.layout().setSpacing(10)
 
-        self.main_layout.addLayout(manual_joint_ori_layout)
         self.main_layout.addLayout(manual_joint_splitter_layout)
+        self.main_layout.addLayout(manual_joint_ori_layout)
         self.main_layout.addWidget(dividers.Divider())
         self.main_layout.addLayout(manual_joint_ori_buttons_layout)
         self.main_layout.addWidget(set_rot_axis_widget)
@@ -216,7 +211,7 @@ class ManualOrientJointController(object):
 
     @property
     def client(self):
-        return self._client
+        return self._client()
 
     @property
     def model(self):
@@ -262,13 +257,13 @@ class ManualOrientJointController(object):
         self._model.z_axis = 0.0
 
     def manual_orient_joints(self, orient_type):
-        return self._client.manual_orient_joints(
+        return self.client.manual_orient_joints(
             orient_type=orient_type, x_axis=self._model.x_axis, y_axis=self._model.y_axis, z_axis=self._model.z_axis,
             affect_children=self._model.affect_children
         )
 
     def set_manual_orient_joints(self):
-        return self._client.set_manual_joints(
+        return self.client.set_manual_joints(
             x_axis=self._model.x_axis, y_axis=self._model.y_axis, z_axis=self._model.z_axis,
             affect_children=self._model.affect_children
         )

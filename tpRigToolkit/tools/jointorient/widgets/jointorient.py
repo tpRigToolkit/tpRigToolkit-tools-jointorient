@@ -12,15 +12,16 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
+import logging
 from functools import partial
 
-from Qt.QtCore import *
+from Qt.QtCore import Qt, Signal, QObject
 
-import tpDcc as tp
+from tpDcc.managers import resources
 from tpDcc.libs.qt.core import base
-from tpDcc.libs.qt.widgets import layouts, buttons, spinbox, dividers, group, checkbox
+from tpDcc.libs.qt.widgets import layouts, group, buttons, spinbox, checkbox
 
-LOGGER = tp.LogsMgr().get_logger('tpRigToolkit-tools-jointorient')
+LOGGER = logging.getLogger('tpRigToolkit-tools-jointorient')
 
 
 class JointOrientView(base.BaseWidget, object):
@@ -84,18 +85,15 @@ class JointOrientView(base.BaseWidget, object):
         joint_orient_btn_layout = layouts.HorizontalLayout()
         joint_orient_btn_layout.addStretch()
         self._joint_orient_btn = buttons.BaseButton('Apply', parent=self)
-        self._reset_orient_to_world_btn = buttons.BaseButton('Reset to World', parent=self)
+        self._joint_orient_btn.setIcon(resources.icon('ok'))
         self._hierarchy_cbx = checkbox.BaseCheckBox('Hierarchy', parent=self)
-        self._joint_orient_btn.setMaximumWidth(80)
         joint_orient_btn_layout.addWidget(self._joint_orient_btn)
-        joint_orient_btn_layout.addWidget(self._reset_orient_to_world_btn)
         joint_orient_btn_layout.addWidget(self._hierarchy_cbx)
         joint_orient_btn_layout.addStretch()
 
         self.main_layout.addWidget(aim_axis_box)
         self.main_layout.addWidget(up_axis_box)
         self.main_layout.addWidget(up_world_axis_box)
-        self.main_layout.addWidget(dividers.Divider())
         self.main_layout.addLayout(joint_orient_btn_layout)
 
     def setup_signals(self):
@@ -116,7 +114,6 @@ class JointOrientView(base.BaseWidget, object):
         self._up_world_y_btn.clicked.connect(self._controller.set_up_world_axis_to_y)
         self._up_world_z_btn.clicked.connect(self._controller.set_up_world_axis_to_z)
         self._joint_orient_btn.clicked.connect(self._controller.orient_joints)
-        self._reset_orient_to_world_btn.clicked.connect(self._controller.reset_joints_orient_to_world)
 
         self._model.aimAxisChanged.connect(self._on_aim_axis_changed)
         self._model.aimAxisReverseChanged.connect(self._aim_rev_cbx.setChecked)
@@ -249,7 +246,7 @@ class JointOrientController(object):
 
     @property
     def client(self):
-        return self._client
+        return self._client()
 
     @property
     def model(self):
@@ -295,14 +292,11 @@ class JointOrientController(object):
         self._model.up_world_axis_z = 1.0
 
     def orient_joints(self):
-        return self._client.orient_joints(
+        return self.client.orient_joints(
             aim_axis_index=self._model.aim_axis, aim_axis_reverse=self._model.aim_axis_reverse,
             up_axis_index=self._model.up_axis, up_axis_reverse=self._model.up_axis_reverse,
             up_world_axis_x=self._model.up_world_axis_x, up_world_axis_y=self._model.up_world_axis_y,
             up_world_axis_z=self._model.up_world_axis_z, apply_to_hierarchy=self._model.apply_to_hierarchy)
-
-    def reset_joints_orient_to_world(self):
-        return self._client.reset_joints_orient_to_world(apply_to_hierarchy=self._model.apply_to_hierarchy)
 
 
 def joint_orient(client, parent=None):

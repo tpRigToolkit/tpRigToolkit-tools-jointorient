@@ -15,12 +15,15 @@ __email__ = "tpovedatd@gmail.com"
 from functools import partial
 from collections import OrderedDict
 
-from Qt.QtCore import *
-from Qt.QtWidgets import *
+from Qt.QtCore import Qt, Signal, QObject
+from Qt.QtWidgets import QMenu
 
-import tpDcc as tp
+from tpDcc.managers import resources
 from tpDcc.libs.qt.core import base
 from tpDcc.libs.qt.widgets import layouts, buttons, combobox, checkbox
+
+# TODO: This should be independent for each DCC
+ROTATION_AXES = ['xyz', 'yzx', 'zxy', 'xzy', 'yxz', 'zyx']
 
 
 class RotationAxisView(base.BaseWidget, object):
@@ -39,7 +42,7 @@ class RotationAxisView(base.BaseWidget, object):
         set_rot_top_layout = layouts.HorizontalLayout(spacing=5)
         self._set_rot_axis_box = combobox.BaseComboBox(parent=self)
         set_rot_top_layout.addWidget(self._set_rot_axis_box)
-        for rotAxis in tp.Dcc.ROTATION_AXES:
+        for rotAxis in ROTATION_AXES:
             self._set_rot_axis_box.addItem(rotAxis)
         set_rot_axis_common_btn = buttons.BaseButton('   <', parent=self)
         set_rot_axis_common_btn.setMaximumWidth(45)
@@ -51,7 +54,8 @@ class RotationAxisView(base.BaseWidget, object):
 
         set_rot_axis_btn_layout = layouts.HorizontalLayout()
         set_rot_axis_btn_layout.setAlignment(Qt.AlignCenter)
-        self._set_rot_axis_btn = buttons.BaseButton('Set', parent=self)
+        self._set_rot_axis_btn = buttons.BaseButton('Apply', parent=self)
+        self._set_rot_axis_btn.setIcon(resources.icon('ok'))
         self._affect_children_cbx = checkbox.BaseCheckBox('Affect Children', parent=self)
         self._set_rot_axis_btn.setMaximumWidth(100)
         set_rot_axis_btn_layout.addWidget(self._set_rot_axis_btn)
@@ -76,9 +80,9 @@ class RotationAxisView(base.BaseWidget, object):
 
         available_axises = self._model.available_rotation_axis or dict()
         for i, (name, order) in enumerate(available_axises.items()):
-            if order.lower() not in tp.Dcc.ROTATION_AXES:
+            if order.lower() not in ROTATION_AXES:
                 continue
-            rot_axis_index = tp.Dcc.ROTATION_AXES.index(order.lower())
+            rot_axis_index = ROTATION_AXES.index(order.lower())
             self._set_rot_axis_common_btn_menu.addAction(
                 '({})   {}'.format(order, name), partial(self._controller.change_rotation_order, rot_axis_index))
 

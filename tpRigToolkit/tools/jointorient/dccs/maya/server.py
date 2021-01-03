@@ -10,10 +10,13 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
-import tpDcc as tp
-from tpDcc.core import server
+import logging
 
-LOGGER = tp.LogsMgr().get_logger('tpRigToolkit-tools-jointorient')
+from tpDcc import dcc
+from tpDcc.core import server
+from tpDcc.libs.python import python
+
+LOGGER = logging.getLogger('tpRigToolkit-tools-jointorient')
 
 
 class JointOrientServer(server.DccServer, object):
@@ -38,7 +41,7 @@ class JointOrientServer(server.DccServer, object):
         else:
             super(JointOrientServer, self)._process_command(command_name, data_dict, reply_dict)
 
-    @tp.Dcc.undo_decorator()
+    @dcc.undo_decorator()
     def orient_joints(self, data, reply):
         aim_axis_index = data.get('aim_axis_index', 0.0)
         aim_axis_reverse = data.get('aim_axis_reverse', False)
@@ -67,25 +70,26 @@ class JointOrientServer(server.DccServer, object):
 
         # Get selected joints
         if apply_to_hierarchy:
-            tp.Dcc.select_hierarchy()
+            dcc.select_hierarchy()
 
-        joints = tp.Dcc.selected_nodes_of_type(node_type='joint', full_path=False)
+        joints = dcc.selected_nodes_of_type(node_type='joint', full_path=False)
         if not joints:
             reply['msg'] = 'No joints selected'
             reply['success'] = False
             return
 
         for jnt in reversed(joints):
-            childs = tp.Dcc.list_children(jnt, all_hierarchy=False, children_type=['transform', 'joint'])
+            childs = dcc.list_children(jnt, all_hierarchy=False, children_type=['transform', 'joint'])
 
             # If the joints has direct childs, unparent that childs and store names
             if childs:
                 if len(childs) > 0:
-                    childs = tp.Dcc.set_parent_to_world(childs)
+                    childs = dcc.set_parent_to_world(childs)
+            childs = python.force_list(childs)
 
             # Get parent of this joints for later use
             parent = ''
-            parents = tp.Dcc.node_parent(jnt)
+            parents = dcc.node_parent(jnt)
             if parents:
                 parent = parents[0]
 
@@ -93,20 +97,20 @@ class JointOrientServer(server.DccServer, object):
             aim_target = ''
             if childs:
                 for child in childs:
-                    if tp.Dcc.node_type(child) == 'joint':
+                    if dcc.node_type(child) == 'joint':
                         aim_target = child
                         break
 
             if aim_target != '':
 
                 # Apply an aim constraint from the joint to its child (target)
-                tp.Dcc.delete_object(tp.Dcc.create_aim_constraint(
+                dcc.delete_node(dcc.create_aim_constraint(
                     jnt, aim_target, aim_axis=aim_axis, up_axis=up_axis, world_up_axis=world_up_axis,
                     world_up_type='vector', weight=1.0))
 
                 # Clear joint axis
-                tp.Dcc.zero_scale_joint(jnt)
-                tp.Dcc.freeze_transforms(jnt, preserve_pivot_transforms=True)
+                dcc.zero_scale_joint(jnt)
+                dcc.freeze_transforms(jnt, preserve_pivot_transforms=True)
 
             elif parent != '':
                 reset_joints.append(jnt)
@@ -114,65 +118,65 @@ class JointOrientServer(server.DccServer, object):
             # Reparent child
             if childs:
                 if len(childs) > 0:
-                    tp.Dcc.set_parent(childs, jnt)
+                    dcc.set_parent(childs, jnt)
 
         for jnt in reset_joints:
             # If there is no target, the joint will take its parent orientation
             for axis in ['x', 'y', 'z']:
-                tp.Dcc.set_attribute_value(
-                    jnt, 'jointOrient{}'.format(axis.upper()), tp.Dcc.get_attribute_value(jnt, 'r{}'.format(axis)))
-                tp.Dcc.set_attribute_value(jnt, 'r{}'.format(axis), 0)
+                dcc.set_attribute_value(
+                    jnt, 'jointOrient{}'.format(axis.upper()), dcc.get_attribute_value(jnt, 'r{}'.format(axis)))
+                dcc.set_attribute_value(jnt, 'r{}'.format(axis), 0)
 
-        tp.Dcc.select_node(joints, replace_selection=True)
+        dcc.select_node(joints, replace_selection=True)
 
         reply['success'] = True
 
-    @tp.Dcc.undo_decorator()
+    @dcc.undo_decorator()
     def reset_joints_orient_to_world(self, data, reply):
         apply_to_hierarchy = data.get('apply_to_hierarchy', False)
 
         if apply_to_hierarchy:
-            tp.Dcc.select_hierarchy()
+            dcc.select_hierarchy()
 
-        joints = tp.Dcc.selected_nodes_of_type(node_type='joint', full_path=False)
+        joints = dcc.selected_nodes_of_type(node_type='joint', full_path=False)
         if not joints:
             reply['msg'] = 'No joints selected'
             reply['success'] = False
             return
 
         for jnt in reversed(joints):
-            childs = tp.Dcc.list_children(jnt, all_hierarchy=False, children_type=['transform', 'joint'])
+            childs = dcc.list_children(jnt, all_hierarchy=False, children_type=['transform', 'joint'])
 
             # If the joints has direct childs, unparent that childs and store names
             if childs:
                 if len(childs) > 0:
-                    childs = tp.Dcc.set_parent_to_world(childs)
+                    childs = dcc.set_parent_to_world(childs)
 
             # Get parent of this joints for later use
-            parent = tp.Dcc.node_parent(jnt, full_path=False) or ''
+            parent = dcc.node_parent(jnt, full_path=False) or ''
 
             if parent:
-                tp.Dcc.set_parent_to_world(jnt)
+                dcc.set_parent_to_world(jnt)
 
             # Clear joint axis
-            tp.Dcc.zero_scale_joint(jnt)
-            tp.Dcc.freeze_transforms(jnt, preserve_pivot_transforms=True)
-            tp.Dcc.zero_orient_joint(jnt)
+            dcc.zero_scale_joint(jnt)
+            dcc.freeze_transforms(jnt, preserve_pivot_transforms=True)
+            dcc.zero_orient_joint(jnt)
 
             # Reparent
             if parent:
-                tp.Dcc.set_parent(jnt, parent)
+                dcc.set_parent(jnt, parent)
 
             # Reparent child
             if childs:
                 if len(childs) > 0:
-                    tp.Dcc.set_parent(childs, jnt)
+                    dcc.set_parent(childs, jnt)
 
-        tp.Dcc.select_node(joints, replace_selection=True)
+        dcc.select_node(joints, replace_selection=True)
 
         reply['success'] = True
 
-    @tp.Dcc.undo_decorator()
+    @dcc.undo_decorator()
     def manual_orient_joints(self, data, reply):
 
         orient_type = data.get('orient_type', 'add')
@@ -188,31 +192,31 @@ class JointOrientServer(server.DccServer, object):
 
         tweak_rot = [x_axis * tweak, y_axis * tweak, z_axis * tweak]
 
-        joints = tp.Dcc.selected_nodes_of_type(node_type='joint')
+        joints = dcc.selected_nodes_of_type(node_type='joint')
         if not joints:
             return
 
         for jnt in joints:
-            tp.Dcc.set_node_rotation_axis_in_object_space(jnt, tweak_rot[0], tweak_rot[1], tweak_rot[2])
-            tp.Dcc.zero_scale_joint(jnt)
-            tp.Dcc.freeze_transforms(jnt, preserve_pivot_transforms=True)
+            dcc.set_node_rotation_axis_in_object_space(jnt, tweak_rot[0], tweak_rot[1], tweak_rot[2])
+            dcc.zero_scale_joint(jnt)
+            dcc.freeze_transforms(jnt, preserve_pivot_transforms=True)
 
             if affect_children:
-                childs = tp.Dcc.list_children(
+                childs = dcc.list_children(
                     jnt, children_type=['transform', 'joint'], full_path=False, all_hierarchy=True) or list()
                 for child in childs:
-                    parent = tp.Dcc.node_parent(child)
-                    tp.Dcc.set_parent_to_world(child)
-                    tp.Dcc.set_node_rotation_axis_in_object_space(child, tweak_rot[0], tweak_rot[1], tweak_rot[2])
-                    tp.Dcc.zero_scale_joint(child)
-                    tp.Dcc.freeze_transforms(child, preserve_pivot_transforms=True)
-                    tp.Dcc.set_parent(child, parent)
+                    parent = dcc.node_parent(child)
+                    dcc.set_parent_to_world(child)
+                    dcc.set_node_rotation_axis_in_object_space(child, tweak_rot[0], tweak_rot[1], tweak_rot[2])
+                    dcc.zero_scale_joint(child)
+                    dcc.freeze_transforms(child, preserve_pivot_transforms=True)
+                    dcc.set_parent(child, parent)
 
-        tp.Dcc.select_node(joints, replace_selection=True)
+        dcc.select_node(joints, replace_selection=True)
 
         reply['success'] = True
 
-    @tp.Dcc.undo_decorator()
+    @dcc.undo_decorator()
     def set_manual_orient_joints(self, data, reply):
         x_axis = data.get('x_axis', 0.0)
         y_axis = data.get('y_axis', 0.0)
@@ -223,70 +227,70 @@ class JointOrientServer(server.DccServer, object):
 
         tweak_rot = [x_axis, y_axis, z_axis]
 
-        joints = tp.Dcc.selected_nodes_of_type(node_type='joint', full_path=False)
+        joints = dcc.selected_nodes_of_type(node_type='joint', full_path=False)
         if not joints:
             return
 
         for jnt in joints:
             if not affect_children:
-                childs = tp.Dcc.list_children(
+                childs = dcc.list_children(
                     jnt, children_type=['transform', 'joint'], full_path=False, all_hierarchy=False) or list()
                 for child in childs:
-                    tp.Dcc.set_parent_to_world(child)
+                    dcc.set_parent_to_world(child)
 
             # Set the rotation axis
             for i, axis in enumerate(['x', 'y', 'z']):
-                tp.Dcc.set_attribute_value(jnt, 'jointOrient{}'.format(axis.upper()), tweak_rot[i])
+                dcc.set_attribute_value(jnt, 'jointOrient{}'.format(axis.upper()), tweak_rot[i])
 
             # Clear joint axis
-            tp.Dcc.zero_scale_joint(jnt)
-            tp.Dcc.freeze_transforms(jnt, preserve_pivot_transforms=True)
+            dcc.zero_scale_joint(jnt)
+            dcc.freeze_transforms(jnt, preserve_pivot_transforms=True)
 
             if childs:
                 for child in childs:
-                    tp.Dcc.set_parent(child, jnt)
+                    dcc.set_parent(child, jnt)
 
-        tp.Dcc.select_node(joints, replace_selection=True)
+        dcc.select_node(joints, replace_selection=True)
 
         reply['success'] = True
 
-    @tp.Dcc.undo_decorator()
+    @dcc.undo_decorator()
     def set_rotation_axis(self, data, reply):
         rotation_axis = data.get('rotation_axis', '')
         affect_children = data.get('affect_children', False)
 
-        sel = tp.Dcc.selected_nodes_of_type(node_type=['joint', 'transform']) or list()
+        sel = dcc.selected_nodes_of_type(node_type=['joint', 'transform']) or list()
         for obj in sel:
-            tp.Dcc.set_rotation_axis(obj, rotation_axis)
+            dcc.set_rotation_axis(obj, rotation_axis)
             if affect_children:
-                childs = tp.Dcc.list_children(
+                childs = dcc.list_children(
                     obj, children_type=['transform', 'joint'], full_path=True, all_hierarchy=True) or list()
                 for child in childs:
-                    tp.Dcc.set_rotation_axis(child, rotation_axis)
+                    dcc.set_rotation_axis(child, rotation_axis)
 
         reply['success'] = True
 
     @staticmethod
-    @tp.Dcc.undo_decorator()
-    @tp.Dcc.repeat_last_decorator(__name__ + '.JointOrientServer')
+    @dcc.undo_decorator()
+    @dcc.repeat_last_decorator(__name__ + '.JointOrientServer')
     def set_local_rotation_axis(data, reply):
         state = data.get('state', False)
 
-        sel = tp.Dcc.selected_nodes()
+        sel = dcc.selected_nodes()
         for obj in sel:
-            if tp.Dcc.attribute_exists(obj, 'displayLocalAxis'):
-                tp.Dcc.set_attribute_value(obj, 'displayLocalAxis', state)
+            if dcc.attribute_exists(obj, 'displayLocalAxis'):
+                dcc.set_attribute_value(obj, 'displayLocalAxis', state)
 
         reply['success'] = True
 
     @staticmethod
-    @tp.Dcc.undo_decorator()
-    @tp.Dcc.repeat_last_decorator(__name__ + '.JointOrientServer')
+    @dcc.undo_decorator()
+    @dcc.repeat_last_decorator(__name__ + '.JointOrientServer')
     def select_hierarchy(data, reply):
 
-        sel = tp.Dcc.selected_nodes()
+        sel = dcc.selected_nodes()
 
         for obj in sel:
-            tp.Dcc.select_hierarchy(obj, add=True)
+            dcc.select_hierarchy(obj, add=True)
 
         reply['success'] = True

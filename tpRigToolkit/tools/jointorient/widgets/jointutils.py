@@ -7,16 +7,11 @@ Module that contains joint utils orient widget implementation
 
 from __future__ import print_function, division, absolute_import
 
-__author__ = "Tomas Poveda"
-__license__ = "MIT"
-__maintainer__ = "Tomas Poveda"
-__email__ = "tpovedatd@gmail.com"
-
 from functools import partial
 
-from Qt.QtCore import *
+from Qt.QtCore import QObject
 
-import tpDcc as tp
+from tpDcc.managers import resources
 from tpDcc.libs.qt.core import base
 from tpDcc.libs.qt.widgets import layouts, buttons
 
@@ -37,15 +32,23 @@ class JointUtilsView(base.BaseWidget, object):
 
         self._display_lra_btn = buttons.BaseButton('Display LRA', parent=self)
         self._hide_lra_btn = buttons.BaseButton('Hide LRA', parent=self)
+        self._reset_orient_to_world_btn = buttons.BaseButton('Reset to World', parent=self)
         self._select_hierarchy_btn = buttons.BaseButton('Select Hierarchy', parent=self)
+
+        self._display_lra_btn.setIcon(resources.icon('eye'))
+        self._hide_lra_btn.setIcon(resources.icon('eye_closed'))
+        self._reset_orient_to_world_btn.setIcon(resources.icon('reset'))
+        self._select_hierarchy_btn.setIcon(resources.icon('cursor'))
 
         utils_layout.addWidget(self._display_lra_btn, 0, 0)
         utils_layout.addWidget(self._hide_lra_btn, 0, 1)
-        utils_layout.addWidget(self._select_hierarchy_btn, 0, 2)
+        utils_layout.addWidget(self._reset_orient_to_world_btn, 0, 2)
+        utils_layout.addWidget(self._select_hierarchy_btn, 1, 0)
 
     def setup_signals(self):
         self._display_lra_btn.clicked.connect(partial(self._controller.set_lra, True))
         self._hide_lra_btn.clicked.connect(partial(self._controller.set_lra, False))
+        self._reset_orient_to_world_btn.clicked.connect(self._controller.reset_joints_orient_to_world)
         self._select_hierarchy_btn.clicked.connect(self._controller.select_hierarchy)
 
 
@@ -63,18 +66,21 @@ class JointUtilsController(object):
 
     @property
     def client(self):
-        return self._client
+        return self._client()
 
     @property
     def model(self):
         return self._model
 
-    @tp.Dcc.repeat_last_decorator(__name__ + '.JointUtilsController')
+    # @dcc.repeat_last_decorator(__name__ + '.JointUtilsController')
     def set_lra(self, state):
-        return self._client.set_local_rotation_axis(state)
+        return self.client.set_local_rotation_axis(state)
+
+    def reset_joints_orient_to_world(self):
+        return self.client.reset_joints_orient_to_world()
 
     def select_hierarchy(self):
-        return self._client.select_hierarchy()
+        return self.client.select_hierarchy()
 
 
 def joint_utils(client, parent=None):
