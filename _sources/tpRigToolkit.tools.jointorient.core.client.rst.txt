@@ -1,0 +1,7 @@
+tpRigToolkit.tools.jointorient.core.client module
+=================================================
+
+.. automodule:: tpRigToolkit.tools.jointorient.core.client
+   :members:
+   :undoc-members:
+   :show-inheritance:

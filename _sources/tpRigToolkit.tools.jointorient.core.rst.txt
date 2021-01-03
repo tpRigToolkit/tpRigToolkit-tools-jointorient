@@ -7,10 +7,12 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   tpRigToolkit.tools.jointorient.core.client
+   tpRigToolkit.tools.jointorient.core.consts
    tpRigToolkit.tools.jointorient.core.controller
-   tpRigToolkit.tools.jointorient.core.jointorient
-   tpRigToolkit.tools.jointorient.core.jointorientclient
    tpRigToolkit.tools.jointorient.core.model
+   tpRigToolkit.tools.jointorient.core.tool
+   tpRigToolkit.tools.jointorient.core.toolset
    tpRigToolkit.tools.jointorient.core.view
 
 Module contents
