@@ -157,7 +157,7 @@ class RotationAxisController(object):
         self._model.affect_children = flag
 
     def set_rotation_axis(self):
-        return self._client.set_rotation_axis(
+        return self.client.set_rotation_axis(
             rotation_axis=self._model.rotation_axis, affect_children=self._model.affect_children)
 
 
